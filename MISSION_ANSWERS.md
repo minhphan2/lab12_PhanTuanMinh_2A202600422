@@ -37,28 +37,28 @@
 
 ### Exercise 2.1: Dockerfile questions
 
-1. **Base image là gì?** — `python:3.11` (full Python distribution, khoảng ~1 GB)
-2. **Working directory là gì?** — `/app` (set bằng `WORKDIR /app`)
-3. **Tại sao COPY requirements.txt trước?** — Tận dụng **Docker layer cache**. Nếu requirements.txt không đổi, Docker không cần cài lại dependencies → build nhanh hơn nhiều. Chỉ khi code thay đổi mới rebuild layer phía sau.
+1. **Base image là gì?** — `python:3.11`
+2. **Working directory là gì?** — `/app` ,set bằng `WORKDIR /app`
+3. **Tại sao COPY requirements.txt trước?** — Tận dụng **Docker layer cache**. Nếu requirements.txt không đổi, Docker không cần cài lại dependencies giúp build nhanh hơn nhiều. Chỉ khi code thay đổi mới build lại phía sau.
 4. **CMD vs ENTRYPOINT khác nhau thế nào?**
    - `CMD`: command mặc định, có thể bị override khi `docker run`
    - `ENTRYPOINT`: command cố định, `docker run` chỉ thêm arguments
-   - Ví dụ: `CMD ["python", "app.py"]` → chạy `docker run image bash` sẽ override thành bash
+   - Ví dụ: `CMD ["python", "app.py"]`, chạy `docker run image bash` sẽ override thành bash
 
 ### Exercise 2.3: Multi-stage build analysis
 
 **Stage 1 (builder)** làm gì:
 - Dùng `python:3.11-slim` làm base
-- Cài build tools (gcc, libpq-dev) cần để compile dependencies
+- Cài build tools cần để compile dependencies
 - `pip install --user` cài packages vào `/root/.local`
 - Stage này **KHÔNG** được deploy, chỉ dùng để build
 
 **Stage 2 (runtime)** làm gì:
-- Dùng `python:3.11-slim` sạch (không có gcc, build tools)
-- Tạo non-root user `appuser` (security best practice)
-- COPY packages từ builder (`/root/.local` → `/home/appuser/.local`)
+- Dùng `python:3.11-slim` sạch
+- Tạo non-root user `appuser` (security)
+- COPY packages từ builder (`/root/.local` thành `/home/appuser/.local`)
 - COPY source code
-- Chạy với `USER appuser` (không phải root)
+- Chạy với `USER appuser` (không phải làroot)
 - Thêm `HEALTHCHECK` để Docker tự restart nếu fail
 
 **Tại sao image nhỏ hơn?**
@@ -97,6 +97,7 @@
 ## Part 3: Cloud Deployment
 
 ### Exercise 3.1: Railway deployment
+-URL: https://minhclouddeployment-production.up.railway.app/
 
 Railway sử dụng file `railway.toml` để cấu hình:
 - **Builder:** `NIXPACKS` (auto-detect Python, không cần Dockerfile)
