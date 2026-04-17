@@ -98,6 +98,9 @@
 
 ### Exercise 3.1: Railway deployment
 -URL: https://minhclouddeployment-production.up.railway.app/
+-ScreenShots: https://github.com/minhphan2/lab12_PhanTuanMinh_2A202600422/blob/df75bf62ed16674ce729333437e58d8647304c22/screenshots/lab12%201.png
+            : https://github.com/minhphan2/lab12_PhanTuanMinh_2A202600422/blob/df75bf62ed16674ce729333437e58d8647304c22/screenshots/lab12%202.png
+            : https://github.com/minhphan2/lab12_PhanTuanMinh_2A202600422/blob/df75bf62ed16674ce729333437e58d8647304c22/screenshots/lab12%203.png
 
 Railway sử dụng file `railway.toml` để cấu hình:
 - **Builder:** `NIXPACKS` (auto-detect Python, không cần Dockerfile)
