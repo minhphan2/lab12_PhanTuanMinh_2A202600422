@@ -1,0 +1,196 @@
+# 🚗 ViVi — VinFast AI Price Advisor
+
+> **AI Tư vấn Giá Lăn Bánh thông minh cho xe VinFast**  
+> Hackathon AI20K · Nhóm C2-C401
+
+---
+
+## 📌 Giới thiệu đề tài
+
+**ViVi** là trợ lý AI tư vấn bán hàng tự động được thiết kế đặc biệt cho hệ sinh thái xe điện VinFast. Thay vì phải chờ 15–30 phút để nhân viên Sales tổng hợp thông tin, khách hàng có thể nhận ngay **báo giá lăn bánh cá nhân hóa** chỉ trong vài giây — bao gồm đầy đủ các ưu đãi phức tạp như voucher Vinhomes, chính sách thu cũ đổi mới, lãi suất vay ưu đãi và thuê/mua pin.
+
+### ❗ Bài toán
+
+Khách hàng mua xe VinFast hiện nay phải tự tổng hợp hàng loạt chính sách ưu đãi phân tán trên nhiều kênh:
+
+- Chương trình khuyến mãi thời vụ (Giờ Trái Đất, Tương lai Xanh...)
+- Voucher Vinhomes, ưu đãi thu xăng đổi điện
+- Gói thuê pin vs. mua pin
+- Phí trước bạ, biển số theo tỉnh/thành
+- Lãi suất vay ngân hàng liên kết
+
+→ **Giải pháp:** ViVi tự động tra giá niêm yết thực từ web, trích xuất ưu đãi từ tài liệu Sales đã duyệt, và tính toán bằng rule-based engine Python — đảm bảo **zero hallucination** về số tiền.
+
+### 🎯 Tính năng chính
+
+| Tính năng | Mô tả |
+|-----------|-------|
+| 💬 **Chat AI thời gian thực** | Streaming SSE — text xuất hiện ngay từ token đầu tiên |
+| 🔍 **Tra giá niêm yết tự động** | Scrape thực từ vinfastgiare.vn (cache 5 phút) |
+| 🎁 **Tra cứu ưu đãi chính xác** | Đọc từ tài liệu Sales đã duyệt, không tự bịa |
+| 🧮 **Tính giá lăn bánh** | Rule-based engine Python thuần, không dùng LLM để tính số |
+| 🖼️ **Hiển thị xe tự động** | Detect tên xe trong hội thoại → cập nhật hình + màu sắc |
+| 🎙️ **Nhập giọng nói** | Tích hợp Web Speech API |
+| 🔄 **Nhớ ngữ cảnh** | Session in-memory — không cần nhắc lại thông tin đã cung cấp |
+
+### 🏗️ Kiến trúc hệ thống
+
+```
+[Khách hàng — React + TypeScript UI]
+     │  POST /chat/stream  (SSE streaming)
+     │  POST /detect-car   (auto-detect xe + màu)
+     │  GET  /images/{filename}
+     ▼
+[FastAPI Backend — api.py]
+     │
+     ▼
+[LangGraph StateGraph]
+     ├─ agent_node (GPT-4o-mini)
+     │       └─ tool_calls → ToolNode
+     └─ tool_node
+             ├─ search_car        → Jina scrape vinfastgiare.vn
+             ├─ check_promotions  → Sale.md + vinhomes_promotion.md
+             └─ calculate_rolling_price → Rule-based Python (không LLM)
+```
+
+### 🛠️ Tech Stack
+
+| Layer | Công nghệ |
+|-------|-----------|
+| Agent Framework | LangGraph StateGraph, LangChain |
+| LLM | OpenAI GPT-4o-mini |
+| Backend | FastAPI + Uvicorn (async SSE) |
+| Frontend | React + TypeScript + Tailwind + Framer Motion |
+| Dữ liệu ưu đãi | Markdown files (Sale.md) — cập nhật không cần redeploy |
+| Scraping giá | Jina AI reader + in-memory cache 5 phút |
+
+### 👥 Phân công nhóm
+
+| Thành viên | Vai trò |
+|-----------|---------|
+| Phạm Việt Anh + Nguyễn Thùy Linh | AI Canvas + Failure Mode Library |
+| Phan Tuấn Minh + Bùi Minh Ngọc | User Stories 4 paths + UI flow sketch |
+| Phạm Đình Trường | Eval metrics + Test cases + ROI |
+| Lê Đức Thanh + Phạm Việt Hoàng | Backend agent · Tools · System prompt · Frontend React UI |
+
+---
+
+## 🚀 Hướng dẫn sử dụng
+
+### Yêu cầu hệ thống
+
+- **Python** ≥ 3.10
+- **Node.js** ≥ 18
+- **OpenAI API Key** (GPT-4o-mini)
+
+### 1. Clone repository
+
+```bash
+git clone https://github.com/AI20K-C401-C2/Lab6---VINFAST_C2.git
+cd Lab6---VINFAST_C2
+```
+
+### 2. Cài đặt và chạy Backend
+
+```bash
+cd Backend/agent-vivi-lab6
+
+# Tạo môi trường ảo
+python -m venv venv
+
+# Kích hoạt môi trường ảo
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
+
+# Cài đặt thư viện
+pip install -r requirements.txt
+```
+
+Tạo file `.env` trong thư mục `Backend/agent-vivi-lab6/`:
+
+```env
+OPENAI_API_KEY=sk-...your-key-here...
+```
+
+Khởi động backend server:
+
+```bash
+python api.py
+```
+
+Backend sẽ chạy tại: `http://localhost:8000`
+
+### 3. Cài đặt và chạy Frontend
+
+Mở terminal mới:
+
+```bash
+cd vf-ui
+
+# Cài đặt dependencies
+npm install
+
+# Chạy development server
+npm run dev
+```
+
+Frontend sẽ chạy tại: `http://localhost:5173`
+
+### 4. Sử dụng ViVi
+
+1. Mở trình duyệt, truy cập `http://localhost:5173`
+2. Giao diện 2 cột sẽ hiện ra:
+   - **Bên trái:** Khung chat với ViVi
+   - **Bên phải:** Hình xe + bảng màu cập nhật tự động
+3. Chọn một trong 6 **suggestion chips** có sẵn để bắt đầu nhanh, hoặc tự gõ câu hỏi
+4. Ví dụ câu hỏi:
+   - *"Tôi ở Hà Nội, muốn mua VF 5 Plus thuê pin, có voucher Vinhomes thì giá lăn bánh bao nhiêu?"*
+   - *"VF 8 hiện có ưu đãi gì không?"*
+   - *"So sánh giá thuê pin và mua pin cho VF 6"*
+5. Nhấn 🎙️ để **nhập bằng giọng nói** thay vì gõ phím
+
+### 5. Cấu trúc thư mục
+
+```
+Lab6---VINFAST_C2/
+├── Backend/
+│   └── agent-vivi-lab6/       # FastAPI backend + LangGraph agent
+│       ├── agent.py            # LangGraph StateGraph định nghĩa luồng agent
+│       ├── api.py              # FastAPI app, SSE streaming endpoints
+│       ├── tools.py            # 3 tools: search_car, check_promotions, calculate_rolling_price
+│       ├── system_prompt.txt   # Persona + rules cho AI
+│       ├── Sale.md             # Cơ sở dữ liệu ưu đãi VinFast (cập nhật định kỳ)
+│       └── requirements.txt
+├── vf-ui/                      # React + TypeScript frontend
+│   └── src/
+├── Report-team-C401-C2/        # Tài liệu đề tài
+│   ├── spec-final.md           # AI Product Specification đầy đủ
+│   └── prototype-readme.md     # Mô tả prototype
+├── Report-member/              # Sketch từng thành viên
+└── README.md
+```
+
+---
+
+## 📊 Dữ liệu ưu đãi (tháng 4/2026)
+
+| Chương trình | Mức ưu đãi | Thời hạn |
+|---|---|---|
+| Giờ Trái Đất | Voucher 5–20M theo dòng xe | Đến 30/06/2026 |
+| Thu xăng đổi điện | 3% MSRP | Đến 30/04/2026 |
+| Mãnh liệt vì Tương lai Xanh | 6% MSRP (VF 3–7) / 10% MSRP (VF 8–9) | Đến 31/12/2026 |
+| Mua xe 0 Đồng | Vay 100% giá trị xe | Đến 31/12/2026 |
+| VF 7 / VF 8 Eco | Giảm thẳng 50M / 20–50M | Đến khi có thông báo mới |
+
+> ⚠️ **Lưu ý:** Dữ liệu ưu đãi trong `Sale.md` cần được cập nhật định kỳ theo thông báo chính thức từ VinFast. Mọi thông tin từ ViVi mang tính **tham khảo** — vui lòng xác nhận với chuyên viên tư vấn hoặc hotline **1900 232 389**.
+
+---
+
+## 📄 Tài liệu tham khảo
+
+- [AI Product Specification](./Report-team-C401-C2/spec-final.md)
+- [Prototype README](./Report-team-C401-C2/prototype-readme.md)
+- [VinFast Giá Xe](https://vinfastgiare.vn)
+- [VinFast Official](https://vinfast.vn)
