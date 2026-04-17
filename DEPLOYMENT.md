@@ -1,7 +1,7 @@
 # Deployment Information
 
 ## Public URL
-https://minhclouddeployment-production.up.railway.app
+https://minhai-production.up.railway.app
 
 ## Platform
 Railway
@@ -10,13 +10,13 @@ Railway
 
 ### Health Check
 ```bash
-curl https://minhclouddeployment-production.up.railway.app/health
+curl https://minhai-production.up.railway.app/health
 # Expected: {"status": "ok", ...}
 ```
 
 ### API Test (with authentication)
 ```bash
-curl -X POST https://minhclouddeployment-production.up.railway.app/ask \
+curl -X POST https://minhai-production.up.railway.app/ask \
   -H "X-API-Key: my-secret-key-123" \
   -H "Content-Type: application/json" \
   -d '{"question": "What is Docker?"}'
@@ -28,5 +28,5 @@ curl -X POST https://minhclouddeployment-production.up.railway.app/ask \
 
 ## Screenshots
 - [Dashboard](screenshots/lab12 1.png)
-- [Health Check](screenshots/lab12 2.png)
+- [Health Check](screenshots/lab12deploy hea)
 - [API Docs](screenshots/lab12 3.png)
