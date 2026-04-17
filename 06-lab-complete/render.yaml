@@ -1,20 +1,25 @@
 services:
   - type: web
     name: ai-agent-production
-    runtime: docker
+    runtime: python
     region: singapore
-    plan: starter
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     autoDeploy: true
+    rootDir: 06-lab-complete
     envVars:
       - key: ENVIRONMENT
         value: production
       - key: APP_VERSION
         value: "1.0.0"
+      - key: PYTHON_VERSION
+        value: "3.11.0"
       - key: OPENAI_API_KEY
         sync: false
       - key: AGENT_API_KEY
-        generateValue: true
+        value: "my-secret-api-key-2026"
       - key: JWT_SECRET
         generateValue: true
       - key: DAILY_BUDGET_USD
